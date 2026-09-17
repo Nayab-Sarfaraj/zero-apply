@@ -58,3 +58,13 @@ class ScreeningOutput(BaseModel):
     )
     experience_match_percentage: float
     nice_to_have_matches:list[str]=Field(description="List of skills that are in the job description nice to have section and user also have it")
+
+
+class screening_schema(BaseModel):
+    id: int
+    candidate_id: int
+    score: float | None = None
+    strengths: list[str]
+    weaknesses: list[str]
+    recommendation: str | None = None
+    experience_match_percentage: float | None = None

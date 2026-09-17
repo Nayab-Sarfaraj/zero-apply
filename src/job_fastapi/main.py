@@ -1,8 +1,9 @@
 from fastapi import FastAPI,status,Depends,HTTPException,UploadFile,File,Form
 from job_fastapi.config.database import Base,get_db,engine
-from job_fastapi.schema.job import create_job_request,job_schema,add_candidate,ScreeningOutput
+from job_fastapi.schema.job import create_job_request,job_schema,add_candidate,ScreeningOutput,screening_schema
 from job_fastapi.models.job_mode import Job
 from job_fastapi.models.candidate import Candidate
+from job_fastapi.models.screening import Screening
 from sqlalchemy.orm import Session
 from sqlalchemy  import select
 from langchain_groq import ChatGroq
@@ -140,6 +141,29 @@ def get_candidate(candidate_id:int,db:Session=Depends(get_db)):
     if not candiate :
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"Candidate with id {candidate_id} is not found")
     return candiate
+
+@app.get("/candidates/{candidate_id}/screening", response_model=screening_schema, status_code=status.HTTP_200_OK)
+def get_candidate_screening(candidate_id: int, db: Session = Depends(get_db)):
+    candidate = db.scalar(select(Candidate).where(Candidate.id == candidate_id))
+    if not candidate:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Candidate with id {candidate_id} is not found"
+        )
+
+    screening = db.scalar(
+        select(Screening)
+        .where(Screening.candidate_id == candidate_id)
+        .order_by(Screening.id.desc())
+    )
+
+    if not screening:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Screening result for candidate {candidate_id} was not found"
+        )
+
+    return screening
 
 @app.get("/jobs/{job_id}/candidates")
 def get_candidates(job_id:int,db:Session=Depends(get_db)):

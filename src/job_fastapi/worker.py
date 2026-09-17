@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from job_fastapi.models.job_mode import Job
 from job_fastapi.models.candidate import Candidate
+from job_fastapi.models.screening import Screening
 
 from job_fastapi.config.database import DATABASE_URL
 
@@ -131,8 +132,20 @@ async def screen_candidate_job(ctx, candidate_id: int):
 
         print("Score:", score)
 
-        # TODO:
-        # Save result to Screening table
+        screening = Screening(
+            candidate_id=candidate.id,
+            score=float(score),
+            strengths=result.strengths,
+            weaknesses=result.weaknesses,
+            recommendation=result.recommendation,
+            experience_match_percentage=float(result.experience_match_percentage),
+        )
+
+        db.add(screening)
+        db.commit()
+        db.refresh(screening)
+
+        print("Saved screening:", screening.id)
 
 
 class WorkerSettings:

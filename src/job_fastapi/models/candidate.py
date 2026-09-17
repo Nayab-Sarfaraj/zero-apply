@@ -16,7 +16,7 @@ class JobStatus(str, Enum):
     HIRED="hired"
 
 class Candidate(Base):
-    __tablename__ = "candidate"
+    __tablename__ = "candidates"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name:Mapped[str]=mapped_column(String,nullable=False)
@@ -31,3 +31,7 @@ class Candidate(Base):
         default=datetime.utcnow, nullable=False
     )
     job:Mapped["Job"]=relationship(back_populates="candidates")
+    screenings: Mapped[list["Screening"]] = relationship(
+        "Screening",
+        back_populates="candidate"
+    )
